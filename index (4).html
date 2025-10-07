@@ -1,0 +1,1543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VLANNER - Ultimate VLAN Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 10px;
+            font-size: 3em;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.4);
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 30px;
+            font-size: 1.2em;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .tab {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 12px 12px 0 0;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+            border: 2px solid transparent;
+        }
+        
+        .tab:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateY(-3px);
+        }
+        
+        .tab.active {
+            background: white;
+            color: #1e3c72;
+            border-bottom: none;
+        }
+        
+        .calculator {
+            background: white;
+            border-radius: 0 15px 15px 15px;
+            padding: 35px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.4);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .section-header {
+            background: linear-gradient(135deg, #1e3c72 0%, #7e22ce 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+        
+        .input-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border 0.3s;
+            font-family: inherit;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #7e22ce;
+            box-shadow: 0 0 0 3px rgba(126, 34, 206, 0.1);
+        }
+        
+        button.calc-btn {
+            background: linear-gradient(135deg, #1e3c72 0%, #7e22ce 100%);
+            color: white;
+            border: none;
+            padding: 16px 40px;
+            border-radius: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            transition: all 0.3s;
+            margin-top: 15px;
+            box-shadow: 0 4px 15px rgba(126, 34, 206, 0.3);
+        }
+        
+        button.calc-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(126, 34, 206, 0.4);
+        }
+        
+        button.calc-btn:active {
+            transform: translateY(0);
+        }
+        
+        .results {
+            margin-top: 30px;
+            display: none;
+        }
+        
+        .results.show {
+            display: block;
+            animation: slideIn 0.4s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .result-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            border-left: 5px solid #7e22ce;
+        }
+        
+        .result-card h3 {
+            color: #1e3c72;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .info-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .info-label {
+            font-size: 0.85em;
+            color: #666;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .info-value {
+            font-size: 1.2em;
+            color: #1e3c72;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .command-box {
+            background: #1e293b;
+            color: #10b981;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            margin-top: 20px;
+            position: relative;
+            overflow-x: auto;
+        }
+        
+        .command-box pre {
+            margin: 0;
+            white-space: pre;
+            line-height: 1.6;
+        }
+        
+        .command-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #334155;
+        }
+        
+        .command-title {
+            color: #60a5fa;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        .copy-cmd-btn {
+            background: #7e22ce;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .copy-cmd-btn:hover {
+            background: #6b21a8;
+            transform: scale(1.05);
+        }
+        
+        .copy-cmd-btn.copied {
+            background: #10b981;
+        }
+        
+        .vlan-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .vlan-table th {
+            background: linear-gradient(135deg, #1e3c72 0%, #7e22ce 100%);
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .vlan-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .vlan-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .vlan-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .vlan-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+        
+        .vlan-access {
+            background: #10b981;
+            color: white;
+        }
+        
+        .vlan-trunk {
+            background: #f59e0b;
+            color: white;
+        }
+        
+        .vlan-voice {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .add-vlan-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+        
+        .add-vlan-btn:hover {
+            background: #059669;
+            transform: scale(1.02);
+        }
+        
+        .remove-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+        
+        .vlan-input-group {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border: 2px dashed #7e22ce;
+        }
+        
+        .warning-box {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .warning-box strong {
+            color: #92400e;
+        }
+        
+        .info-box {
+            background: #dbeafe;
+            border-left: 4px solid #3b82f6;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .info-box strong {
+            color: #1e40af;
+        }
+        
+        .success-box {
+            background: #d1fae5;
+            border-left: 4px solid #10b981;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .success-box strong {
+            color: #065f46;
+        }
+        
+        .topology-diagram {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .device-box {
+            display: inline-block;
+            background: linear-gradient(135deg, #1e3c72 0%, #7e22ce 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            margin: 10px;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        
+        .accordion {
+            margin-top: 20px;
+        }
+        
+        .accordion-item {
+            background: white;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .accordion-header {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 15px 20px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #1e3c72;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+        
+        .accordion-header:hover {
+            background: linear-gradient(135deg, #e5e7eb 0%, #b3c0d2 100%);
+        }
+        
+        .accordion-content {
+            padding: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+        
+        .accordion-content.active {
+            padding: 20px;
+            max-height: 2000px;
+        }
+        
+        @media (max-width: 768px) {
+            .input-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .tab {
+                border-radius: 10px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌐 VLANNER</h1>
+        <p class="subtitle">The Ultimate VLAN Planning & Configuration Tool</p>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab(0)">🏗️ VLAN Design</button>
+            <button class="tab" onclick="switchTab(1)">🔧 Basic Config</button>
+            <button class="tab" onclick="switchTab(2)">🌉 Trunk Setup</button>
+            <button class="tab" onclick="switchTab(3)">🔀 Inter-VLAN Routing</button>
+            <button class="tab" onclick="switchTab(4)">📡 VTP Config</button>
+            <button class="tab" onclick="switchTab(5)">🎤 Voice VLAN</button>
+            <button class="tab" onclick="switchTab(6)">🔒 Private VLAN</button>
+        </div>
+        
+        <div class="calculator">
+            <!-- Tab 0: VLAN Design Calculator -->
+            <div class="tab-content active" id="tab0">
+                <div class="section-header">🏗️ VLAN Network Design Calculator</div>
+                
+                <div class="input-group">
+                    <label>Network Base Address (e.g., 10.0.0.0)</label>
+                    <input type="text" id="designBase" placeholder="10.0.0.0" value="10.0.0.0">
+                </div>
+                
+                <div class="input-group">
+                    <label>Base Subnet Mask (CIDR)</label>
+                    <input type="text" id="designMask" placeholder="/16" value="/16">
+                </div>
+                
+                <div id="vlanDesignInputs">
+                    <div class="vlan-input-group">
+                        <div class="input-row">
+                            <div>
+                                <label>VLAN Name/Department</label>
+                                <input type="text" class="vlan-design-name" placeholder="Sales" value="Sales">
+                            </div>
+                            <div>
+                                <label>VLAN ID</label>
+                                <input type="number" class="vlan-design-id" placeholder="10" value="10" min="1" max="4094">
+                            </div>
+                        </div>
+                        <div class="input-row">
+                            <div>
+                                <label>Number of Hosts Required</label>
+                                <input type="number" class="vlan-design-hosts" placeholder="100" value="100" min="2">
+                            </div>
+                            <div>
+                                <label>Description (Optional)</label>
+                                <input type="text" class="vlan-design-desc" placeholder="Sales Department Network">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="add-vlan-btn" onclick="addDesignVLAN()">+ Add Another VLAN</button>
+                <button class="calc-btn" onclick="calculateVLANDesign()">🚀 Generate VLAN Design</button>
+                
+                <div class="results" id="designResults"></div>
+            </div>
+            
+            <!-- Tab 1: Basic VLAN Configuration -->
+            <div class="tab-content" id="tab1">
+                <div class="section-header">🔧 Basic VLAN Configuration Generator</div>
+                
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Isolated VLAN ID</label>
+                        <input type="number" id="pvlanIsolated" placeholder="101" value="101" min="1" max="4094">
+                    </div>
+                    <div class="input-group">
+                        <label>Community VLAN ID</label>
+                        <input type="number" id="pvlanCommunity" placeholder="102" value="102" min="1" max="4094">
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label>Promiscuous Port (Gateway/Router)</label>
+                    <input type="text" id="pvlanPromiscuous" placeholder="Gi0/1" value="Gi0/1">
+                </div>
+                
+                <div class="input-group">
+                    <label>Isolated Ports (comma-separated)</label>
+                    <input type="text" id="pvlanIsolatedPorts" placeholder="Fa0/1-10" value="Fa0/1-10">
+                </div>
+                
+                <div class="input-group">
+                    <label>Community Ports (comma-separated)</label>
+                    <input type="text" id="pvlanCommunityPorts" placeholder="Fa0/11-20" value="Fa0/11-20">
+                </div>
+                
+                <button class="calc-btn" onclick="generatePVLANConfig()">🚀 Generate Private VLAN Config</button>
+                
+                <div class="results" id="pvlanResults"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTab = 0;
+        
+        function switchTab(index) {
+            document.querySelectorAll('.tab').forEach((tab, i) => {
+                tab.classList.toggle('active', i === index);
+            });
+            document.querySelectorAll('.tab-content').forEach((content, i) => {
+                content.classList.toggle('active', i === index);
+            });
+            currentTab = index;
+        }
+        
+        function addDesignVLAN() {
+            const container = document.getElementById('vlanDesignInputs');
+            const newVLAN = document.createElement('div');
+            newVLAN.className = 'vlan-input-group';
+            newVLAN.innerHTML = `
+                <div class="input-row">
+                    <div>
+                        <label>VLAN Name/Department</label>
+                        <input type="text" class="vlan-design-name" placeholder="Engineering">
+                    </div>
+                    <div>
+                        <label>VLAN ID</label>
+                        <input type="number" class="vlan-design-id" placeholder="20" min="1" max="4094">
+                    </div>
+                </div>
+                <div class="input-row">
+                    <div>
+                        <label>Number of Hosts Required</label>
+                        <input type="number" class="vlan-design-hosts" placeholder="50" min="2">
+                    </div>
+                    <div style="display: flex; align-items: end; gap: 10px;">
+                        <div style="flex: 1;">
+                            <label>Description (Optional)</label>
+                            <input type="text" class="vlan-design-desc" placeholder="Engineering Department">
+                        </div>
+                        <button class="remove-btn" onclick="this.closest('.vlan-input-group').remove()">Remove</button>
+                    </div>
+                </div>
+            `;
+            container.appendChild(newVLAN);
+        }
+        
+        function addBasicVLAN() {
+            const container = document.getElementById('basicVLANInputs');
+            const newVLAN = document.createElement('div');
+            newVLAN.className = 'vlan-input-group';
+            newVLAN.innerHTML = `
+                <div class="input-row">
+                    <div>
+                        <label>VLAN ID</label>
+                        <input type="number" class="basic-vlan-id" placeholder="20" min="1" max="4094">
+                    </div>
+                    <div>
+                        <label>VLAN Name</label>
+                        <input type="text" class="basic-vlan-name" placeholder="ENGINEERING">
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: end;">
+                    <div style="flex: 1;">
+                        <label>Ports to Assign</label>
+                        <input type="text" class="basic-vlan-ports" placeholder="Fa0/11-20">
+                    </div>
+                    <button class="remove-btn" onclick="this.closest('.vlan-input-group').remove()">Remove</button>
+                </div>
+            `;
+            container.appendChild(newVLAN);
+        }
+        
+        function addInterVLAN() {
+            const container = document.getElementById('interVLANInputs');
+            const newVLAN = document.createElement('div');
+            newVLAN.className = 'vlan-input-group';
+            newVLAN.innerHTML = `
+                <div class="input-row">
+                    <div>
+                        <label>VLAN ID</label>
+                        <input type="number" class="intervlan-id" placeholder="20" min="1" max="4094">
+                    </div>
+                    <div>
+                        <label>VLAN Name</label>
+                        <input type="text" class="intervlan-name" placeholder="ENGINEERING">
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: end;">
+                    <div style="flex: 1;">
+                        <div class="input-row">
+                            <div>
+                                <label>Gateway IP Address</label>
+                                <input type="text" class="intervlan-ip" placeholder="10.1.20.1">
+                            </div>
+                            <div>
+                                <label>Subnet Mask</label>
+                                <input type="text" class="intervlan-mask" placeholder="255.255.255.0">
+                            </div>
+                        </div>
+                    </div>
+                    <button class="remove-btn" onclick="this.closest('.vlan-input-group').remove()">Remove</button>
+                </div>
+            `;
+            container.appendChild(newVLAN);
+        }
+        
+        function updateRoutingFields() {
+            const method = document.getElementById('routingMethod').value;
+            document.getElementById('roasFields').style.display = method === 'roas' ? 'block' : 'none';
+            document.getElementById('sviFields').style.display = method === 'svi' ? 'block' : 'none';
+        }
+        
+        function ipToInt(ip) {
+            return ip.split('.').reduce((int, oct) => (int << 8) + parseInt(oct), 0) >>> 0;
+        }
+        
+        function intToIp(int) {
+            return [(int >>> 24) & 0xFF, (int >>> 16) & 0xFF, (int >>> 8) & 0xFF, int & 0xFF].join('.');
+        }
+        
+        function cidrToMask(cidr) {
+            const mask = [];
+            for (let i = 0; i < 4; i++) {
+                const n = Math.min(cidr, 8);
+                mask.push(256 - Math.pow(2, 8 - n));
+                cidr -= n;
+            }
+            return mask.join('.');
+        }
+        
+        function calculateVLANDesign() {
+            const baseNet = document.getElementById('designBase').value.trim();
+            const baseMask = document.getElementById('designMask').value.trim();
+            
+            const names = Array.from(document.querySelectorAll('.vlan-design-name')).map(e => e.value.trim());
+            const ids = Array.from(document.querySelectorAll('.vlan-design-id')).map(e => parseInt(e.value));
+            const hosts = Array.from(document.querySelectorAll('.vlan-design-hosts')).map(e => parseInt(e.value));
+            const descs = Array.from(document.querySelectorAll('.vlan-design-desc')).map(e => e.value.trim());
+            
+            if (!baseNet || !baseMask || names.some(n => !n) || ids.some(id => !id) || hosts.some(h => !h)) {
+                alert('Please fill in all required fields');
+                return;
+            }
+            
+            const vlans = names.map((name, i) => ({
+                name: name,
+                id: ids[i],
+                hostsNeeded: hosts[i],
+                description: descs[i] || `${name} Network`,
+                hostBits: Math.ceil(Math.log2(hosts[i] + 2)),
+                cidr: 32 - Math.ceil(Math.log2(hosts[i] + 2)),
+                actualHosts: Math.pow(2, Math.ceil(Math.log2(hosts[i] + 2))) - 2
+            }));
+            
+            vlans.sort((a, b) => b.hostBits - a.hostBits);
+            
+            let currentIP = ipToInt(baseNet);
+            vlans.forEach(vlan => {
+                const blockSize = Math.pow(2, vlan.hostBits);
+                vlan.network = intToIp(currentIP);
+                vlan.gateway = intToIp(currentIP + 1);
+                vlan.broadcast = intToIp(currentIP + blockSize - 1);
+                vlan.firstUsable = intToIp(currentIP + 2);
+                vlan.lastUsable = intToIp(currentIP + blockSize - 2);
+                vlan.subnetMask = cidrToMask(vlan.cidr);
+                currentIP += blockSize;
+            });
+            
+            vlans.sort((a, b) => a.id - b.id);
+            
+            let html = `
+                <div class="result-card">
+                    <h3>📊 VLAN Design Summary</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Total VLANs</div>
+                            <div class="info-value">${vlans.length}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Base Network</div>
+                            <div class="info-value">${baseNet}${baseMask}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Total Hosts</div>
+                            <div class="info-value">${vlans.reduce((sum, v) => sum + v.actualHosts, 0)}</div>
+                        </div>
+                    </div>
+                    
+                    <table class="vlan-table">
+                        <thead>
+                            <tr>
+                                <th>VLAN ID</th>
+                                <th>Name</th>
+                                <th>Network</th>
+                                <th>Gateway</th>
+                                <th>Usable Range</th>
+                                <th>Hosts</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            vlans.forEach(vlan => {
+                html += `
+                    <tr>
+                        <td><strong>${vlan.id}</strong></td>
+                        <td>${vlan.name}</td>
+                        <td>${vlan.network}/${vlan.cidr}</td>
+                        <td>${vlan.gateway}</td>
+                        <td>${vlan.firstUsable} - ${vlan.lastUsable}</td>
+                        <td>${vlan.actualHosts}</td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="result-card">
+                    <h3>🔧 ${method === 'roas' ? 'Router' : 'Layer 3 Switch'} Configuration</h3>
+                    <div class="command-box">
+                        <div class="command-header">
+                            <span class="command-title">${hostname} Configuration</span>
+                            <button class="copy-cmd-btn" onclick="copyCommand(this, 'intervlan-config')">📋 Copy</button>
+                        </div>
+                        <pre id="intervlan-config">${config}</pre>
+                    </div>
+                </div>
+                
+                <div class="result-card">
+                    <h3>🔍 Verification Commands</h3>
+                    <div class="command-box">
+                        <div class="command-header">
+                            <span class="command-title">Verify Routing</span>
+                            <button class="copy-cmd-btn" onclick="copyCommand(this, 'intervlan-verify')">📋 Copy</button>
+                        </div>
+                        <pre id="intervlan-verify">${verifyConfig}</pre>
+                    </div>
+                </div>
+                
+                ${method === 'roas' ? `
+                <div class="result-card">
+                    <h3>🔌 Switch Trunk Configuration (Required)</h3>
+                    <div class="info-box">
+                        <strong>Important:</strong> The switch port connected to the router must be configured as a trunk!
+                    </div>
+                    <div class="command-box">
+                        <div class="command-header">
+                            <span class="command-title">Switch-Side Configuration</span>
+                            <button class="copy-cmd-btn" onclick="copyCommand(this, 'switch-trunk')">📋 Copy</button>
+                        </div>
+                        <pre id="switch-trunk">! ===== Switch Configuration =====
+configure terminal
+interface [PORT_CONNECTED_TO_ROUTER]
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk allowed vlan ${ids.join(',')}
+ exit
+end
+write memory</pre>
+                    </div>
+                </div>
+                ` : ''}
+            </table>
+                </div>
+                
+                <div class="result-card">
+                    <h3>🔧 Complete Switch Configuration</h3>
+                    <div class="command-box">
+                        <div class="command-header">
+                            <span class="command-title">Switch Configuration Commands</span>
+                            <button class="copy-cmd-btn" onclick="copyCommand(this, 'design-config')">📋 Copy</button>
+                        </div>
+                        <pre id="design-config">! ===== VLAN Creation =====
+configure terminal
+${vlans.map(v => `vlan ${v.id}\n name ${v.name}\n description ${v.description}\n exit`).join('\n')}
+
+! ===== Save Configuration =====
+end
+write memory</pre>
+                    </div>
+                </div>
+                
+                <div class="result-card">
+                    <h3>📋 Documentation Export</h3>
+            `;
+            
+            vlans.forEach(vlan => {
+                html += `
+                    <div class="accordion">
+                        <div class="accordion-item">
+                            <div class="accordion-header" onclick="toggleAccordion(this)">
+                                <span>VLAN ${vlan.id} - ${vlan.name} Details</span>
+                                <span>▼</span>
+                            </div>
+                            <div class="accordion-content">
+                                <div class="info-grid">
+                                    <div class="info-item">
+                                        <div class="info-label">VLAN ID</div>
+                                        <div class="info-value">${vlan.id}</div>
+                                    </div>
+                                    <div class="info-item">
+                                        <div class="info-label">Name</div>
+                                        <div class="info-value">${vlan.name}</div>
+                                    </div>
+                                    <div class="info-item">
+                                        <div class="info-label">Network Address</div>
+                                        <div class="info-value">${vlan.network}/${vlan.cidr}</div>
+                                    </div>
+                                    <div class="info-item">
+                                        <div class="info-label">Subnet Mask</div>
+                                        <div class="info-value">${vlan.subnetMask}</div>
+                                    </div>
+                                    <div class="info-item">
+                                        <div class="info-label">Default Gateway</div>
+                                        <div class="info-value">${vlan.gateway}</div>
+                                    </div>
+                                    <div class="info-item">
+                                        <div class="info-label">Broadcast</div>
+                                        <div class="info-value">${vlan.broadcast}</div>
+                                    </div>
+                                    <div class="info-item">
+                                        <div class="info-label">First Usable IP</div>
+                                        <div class="info-value">${vlan.firstUsable}</div>
+                                    </div>
+                                    <div class="info-item">
+                                        <div class="info-label">Last Usable IP</div>
+                                        <div class="info-value">${vlan.lastUsable}</div>
+                                    </div>
+                                    <div class="info-item">
+                                        <div class="info-label">Usable Hosts</div>
+                                        <div class="info-value">${vlan.actualHosts}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += `</div>`;
+            
+            const results = document.getElementById('designResults');
+            results.className = 'results show';
+            results.innerHTML = html;
+        }
+        
+        function generateBasicConfig() {
+            const hostname = document.getElementById('basicHostname').value.trim();
+            const ios = document.getElementById('basicIOS').value;
+            
+            const ids = Array.from(document.querySelectorAll('.basic-vlan-id')).map(e => parseInt(e.value));
+            const names = Array.from(document.querySelectorAll('.basic-vlan-name')).map(e => e.value.trim().toUpperCase());
+            const ports = Array.from(document.querySelectorAll('.basic-vlan-ports')).map(e => e.value.trim());
+            
+            if (!hostname || ids.some(id => !id) || names.some(n => !n)) {
+                alert('Please fill in all required fields');
+                return;
+            }
+            
+            let config = `! ===== ${hostname} Basic VLAN Configuration =====\n`;
+            config += `configure terminal\n`;
+            config += `hostname ${hostname}\n\n`;
+            
+            config += `! ===== Create VLANs =====\n`;
+            ids.forEach((id, i) => {
+                config += `vlan ${id}\n`;
+                config += ` name ${names[i]}\n`;
+                config += ` exit\n`;
+            });
+            
+            config += `\n! ===== Assign Ports to VLANs =====\n`;
+            ids.forEach((id, i) => {
+                if (ports[i]) {
+                    const portList = ports[i].split(',').map(p => p.trim());
+                    portList.forEach(port => {
+                        config += `interface ${port}\n`;
+                        config += ` switchport mode access\n`;
+                        config += ` switchport access vlan ${id}\n`;
+                        config += ` spanning-tree portfast\n`;
+                        config += ` exit\n`;
+                    });
+                }
+            });
+            
+            config += `\n! ===== Save Configuration =====\n`;
+            config += `end\n`;
+            config += `write memory\n`;
+            
+            let verifyConfig = `! ===== Verification Commands =====\n`;
+            verifyConfig += `show vlan brief\n`;
+            verifyConfig += `show interfaces status\n`;
+            verifyConfig += `show running-config\n`;
+            
+            let html = `
+                <div class="result-card">
+                    <h3>✅ Configuration Generated Successfully</h3>
+                    <div class="success-box">
+                        <strong>Ready to Deploy!</strong> Configuration for ${hostname} with ${ids.length} VLANs has been generated.
+                    </div>
+                </div>
+                
+                <div class="result-card">
+                    <h3>🔧 Switch Configuration Commands</h3>
+                    <div class="command-box">
+                        <div class="command-header">
+                            <span class="command-title">${hostname} Configuration</span>
+                            <button class="copy-cmd-btn" onclick="copyCommand(this, 'basic-config')">📋 Copy All</button>
+                        </div>
+                        <pre id="basic-config">${config}</pre>
+                    </div>
+                </div>
+                
+                <div class="result-card">
+                    <h3>🔍 Verification Commands</h3>
+                    <div class="command-box">
+                        <div class="command-header">
+                            <span class="command-title">Verify Configuration</span>
+                            <button class="copy-cmd-btn" onclick="copyCommand(this, 'basic-verify')">📋 Copy</button>
+                        </div>
+                        <pre id="basic-verify">${verifyConfig}</pre>
+                    </div>
+                </div>
+                
+                <div class="result-card">
+                    <h3>📊 VLAN Summary</h3>
+                    <table class="vlan-table">
+                        <thead>
+                            <tr>
+                                <th>VLAN ID</th>
+                                <th>Name</th>
+                                <th>Assigned Ports</th>
+                                <th>Type</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            ids.forEach((id, i) => {
+                html += `
+                    <tr>
+                        <td><strong>${id}</strong></td>
+                        <td>${names[i]}</td>
+                        <td>${ports[i] || 'None assigned'}</td>
+                        <td><span class="vlan-badge vlan-access">Access</span></td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            const results = document.getElementById('basicResults');
+            results.className = 'results show';
+            results.innerHTML = html;
+        }
+        
+        function generateTrunkConfig() {
+            const hostname = document.getElementById('trunkHostname').value.trim();
+            const interface = document.getElementById('trunkInterface').value.trim();
+            const encap = document.getElementById('trunkEncap').value;
+            const nativeVLAN = document.getElementById('trunkNative').value;
+            const allowed = document.getElementById('trunkAllowed').value.trim();
+            const dtp = document.getElementById('trunkDTP').value;
+            
+            if (!hostname || !interface) {
+                alert('Please fill in all required fields');
+                return;
+            }
+            
+            let config = `! ===== ${hostname} Trunk Configuration =====\n`;
+            config += `configure terminal\n`;
+            config += `hostname ${hostname}\n\n`;
+            
+            config += `! ===== Configure Trunk Port =====\n`;
+            config += `interface ${interface}\n`;
+            config += ` description Trunk to Adjacent Switch\n`;
+            
+            if (encap === 'dot1q') {
+                config += ` switchport trunk encapsulation dot1q\n`;
+            } else {
+                config += ` switchport trunk encapsulation isl\n`;
+            }
+            
+            if (dtp === 'nonegotiate') {
+                config += ` switchport mode trunk\n`;
+                config += ` switchport nonegotiate\n`;
+            } else {
+                config += ` switchport mode ${dtp}\n`;
+            }
+            
+            config += ` switchport trunk native vlan ${nativeVLAN}\n`;
+            
+            if (allowed.toLowerCase() !== 'all') {
+                config += ` switchport trunk allowed vlan ${allowed}\n`;
+            } else {
+                config += ` switchport trunk allowed vlan all\n`;
+            }
+            
+            config += ` exit\n\n`;
+            
+            config += `! ===== Save Configuration =====\n`;
+            config += `end\n`;
+            config += `write memory\n`;
+            
+            let verifyConfig = `! ===== Verification Commands =====\n`;
+            verifyConfig += `show interfaces ${interface} switchport\n`;
+            verifyConfig += `show interfaces ${interface} trunk\n`;
+            verifyConfig += `show vlan brief\n`;
+            verifyConfig += `show dtp interface ${interface}\n`;
+            
+            const dtpModes = {
+                'trunk': 'Permanent trunking - Always trunk, no negotiation',
+                'dynamic-desirable': 'Actively tries to become trunk',
+                'dynamic-auto': 'Becomes trunk if other side is desirable/trunk',
+                'nonegotiate': 'Trunk without DTP negotiation (most secure)'
+            };
+            
+            let html = `
+                <div class="result-card">
+                    <h3>🌉 Trunk Configuration Summary</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Interface</div>
+                            <div class="info-value">${interface}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Encapsulation</div>
+                            <div class="info-value">${encap.toUpperCase()}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Native VLAN</div>
+                            <div class="info-value">${nativeVLAN}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">DTP Mode</div>
+                            <div class="info-value">${dtp}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Allowed VLANs</div>
+                            <div class="info-value">${allowed}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-box">
+                        <strong>DTP Mode:</strong> ${dtpModes[dtp]}
+                    </div>
+                    
+                    ${nativeVLAN === '1' ? '<div class="warning-box"><strong>⚠️ Security Warning:</strong> Using VLAN 1 as native VLAN is not recommended. Consider using an unused VLAN ID for better security.</div>' : ''}
+                </div>
+                
+                <div class="result-card">
+                    <h3>🔧 Trunk Configuration Commands</h3>
+                    <div class="command-box">
+                        <div class="command-header">
+                            <span class="command-title">${hostname} - ${interface}</span>
+                            <button class="copy-cmd-btn" onclick="copyCommand(this, 'trunk-config')">📋 Copy</button>
+                        </div>
+                        <pre id="trunk-config">${config}</pre>
+                    </div>
+                </div>
+                
+                <div class="result-card">
+                    <h3>🔍 Verification Commands</h3>
+                    <div class="command-box">
+                        <div class="command-header">
+                            <span class="command-title">Verify Trunk</span>
+                            <button class="copy-cmd-btn" onclick="copyCommand(this, 'trunk-verify')">📋 Copy</button>
+                        </div>
+                        <pre id="trunk-verify">${verifyConfig}</pre>
+                    </div>
+                </div>
+            `;
+            
+            const results = document.getElementById('trunkResults');
+            results.className = 'results show';
+            results.innerHTML = html;
+        }
+        
+        function generateInterVLANConfig() {
+            const method = document.getElementById('routingMethod').value;
+            
+            const ids = Array.from(document.querySelectorAll('.intervlan-id')).map(e => parseInt(e.value));
+            const names = Array.from(document.querySelectorAll('.intervlan-name')).map(e => e.value.trim().toUpperCase());
+            const ips = Array.from(document.querySelectorAll('.intervlan-ip')).map(e => e.value.trim());
+            const masks = Array.from(document.querySelectorAll('.intervlan-mask')).map(e => e.value.trim());
+            
+            if (ids.some(id => !id) || names.some(n => !n) || ips.some(ip => !ip) || masks.some(m => !m)) {
+                alert('Please fill in all required fields');
+                return;
+            }
+            
+            let config = '';
+            let hostname = '';
+            
+            if (method === 'roas') {
+                hostname = document.getElementById('routerHostname').value.trim();
+                const physInterface = document.getElementById('routerInterface').value.trim();
+                
+                config = `! ===== ${hostname} Router-on-a-Stick Configuration =====\n`;
+                config += `configure terminal\n`;
+                config += `hostname ${hostname}\n\n`;
+                
+                config += `! ===== Enable Physical Interface =====\n`;
+                config += `interface ${physInterface}\n`;
+                config += ` no shutdown\n`;
+                config += ` exit\n\n`;
+                
+                config += `! ===== Create Subinterfaces =====\n`;
+                ids.forEach((id, i) => {
+                    config += `interface ${physInterface}.${id}\n`;
+                    config += ` description ${names[i]} Gateway\n`;
+                    config += ` encapsulation dot1Q ${id}\n`;
+                    config += ` ip address ${ips[i]} ${masks[i]}\n`;
+                    config += ` exit\n\n`;
+                });
+                
+            } else {
+                hostname = document.getElementById('l3Hostname').value.trim();
+                
+                config = `! ===== ${hostname} Layer 3 Switch SVI Configuration =====\n`;
+                config += `configure terminal\n`;
+                config += `hostname ${hostname}\n\n`;
+                
+                config += `! ===== Enable IP Routing =====\n`;
+                config += `ip routing\n\n`;
+                
+                config += `! ===== Create VLANs =====\n`;
+                ids.forEach((id, i) => {
+                    config += `vlan ${id}\n`;
+                    config += ` name ${names[i]}\n`;
+                    config += ` exit\n`;
+                });
+                
+                config += `\n! ===== Create SVIs (Gateway Interfaces) =====\n`;
+                ids.forEach((id, i) => {
+                    config += `interface vlan ${id}\n`;
+                    config += ` description ${names[i]} Gateway\n`;
+                    config += ` ip address ${ips[i]} ${masks[i]}\n`;
+                    config += ` no shutdown\n`;
+                    config += ` exit\n\n`;
+                });
+            }
+            
+            config += `! ===== Save Configuration =====\n`;
+            config += `end\n`;
+            config += `write memory\n`;
+            
+            let verifyConfig = `! ===== Verification Commands =====\n`;
+            if (method === 'roas') {
+                verifyConfig += `show ip interface brief\n`;
+                verifyConfig += `show ip route\n`;
+            } else {
+                verifyConfig += `show ip interface brief\n`;
+                verifyConfig += `show ip route\n`;
+                verifyConfig += `show vlan brief\n`;
+            }
+            
+            let html = `
+                <div class="result-card">
+                    <h3>🔀 Inter-VLAN Routing Configuration</h3>
+                    <div class="info-box">
+                        <strong>Method:</strong> ${method === 'roas' ? 'Router-on-a-Stick (Subinterfaces)' : 'SVI (Layer 3 Switch)'}
+                    </div>
+                    
+                    <table class="vlan-table">
+                        <thead>
+                            <tr>
+                                <th>VLAN ID</th>
+                                <th>Name</th>
+                                <th>Gateway IP</th>
+                                <th>Subnet Mask</th>
+                                <th>${method === 'roas' ? 'Subinterface' : 'SVI'}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            ids.forEach((id, i) => {
+                const subintf = method === 'roas' ? `${document.getElementById('routerInterface').value}.${id}` : `vlan ${id}`;
+                html += `
+                    <tr>
+                        <td><strong>${id}</strong></td>
+                        <td>${names[i]}</td>
+                        <td>${ips[i]}</td>
+                        <td>${masks[i]}</td>
+                        <td>${subintf}</td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                        </tbody>
+                    Switch Hostname</label>
+                        <input type="text" id="basicHostname" placeholder="SW1" value="SW1">
+                    </div>
+                    <div class="input-group">
+                        <label>Cisco IOS Version</label>
+                        <select id="basicIOS">
+                            <option value="modern">Modern (15.x+)</option>
+                            <option value="legacy">Legacy (12.x)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div id="basicVLANInputs">
+                    <div class="vlan-input-group">
+                        <div class="input-row">
+                            <div>
+                                <label>VLAN ID</label>
+                                <input type="number" class="basic-vlan-id" placeholder="10" value="10" min="1" max="4094">
+                            </div>
+                            <div>
+                                <label>VLAN Name</label>
+                                <input type="text" class="basic-vlan-name" placeholder="SALES" value="SALES">
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Ports to Assign (comma-separated, e.g., Fa0/1-10, Gi0/1)</label>
+                            <input type="text" class="basic-vlan-ports" placeholder="Fa0/1-10, Fa0/15">
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="add-vlan-btn" onclick="addBasicVLAN()">+ Add Another VLAN</button>
+                <button class="calc-btn" onclick="generateBasicConfig()">🚀 Generate Configuration</button>
+                
+                <div class="results" id="basicResults"></div>
+            </div>
+            
+            <!-- Tab 2: Trunk Configuration -->
+            <div class="tab-content" id="tab2">
+                <div class="section-header">🌉 Trunk Port Configuration Generator</div>
+                
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Switch Hostname</label>
+                        <input type="text" id="trunkHostname" placeholder="SW1" value="SW1">
+                    </div>
+                    <div class="input-group">
+                        <label>Trunk Port Interface</label>
+                        <input type="text" id="trunkInterface" placeholder="Gi0/1" value="Gi0/1">
+                    </div>
+                </div>
+                
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Encapsulation Type</label>
+                        <select id="trunkEncap">
+                            <option value="dot1q">802.1Q (dot1q)</option>
+                            <option value="isl">ISL (Legacy)</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Native VLAN</label>
+                        <input type="number" id="trunkNative" placeholder="1" value="1" min="1" max="4094">
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label>Allowed VLANs (e.g., 10,20,30 or 10-50 or "all")</label>
+                    <input type="text" id="trunkAllowed" placeholder="10,20,30" value="10,20,30">
+                </div>
+                
+                <div class="input-group">
+                    <label>DTP Mode</label>
+                    <select id="trunkDTP">
+                        <option value="trunk">Trunk (Permanent)</option>
+                        <option value="dynamic-desirable">Dynamic Desirable</option>
+                        <option value="dynamic-auto">Dynamic Auto</option>
+                        <option value="nonegotiate">No Negotiate (Disable DTP)</option>
+                    </select>
+                </div>
+                
+                <button class="calc-btn" onclick="generateTrunkConfig()">🚀 Generate Trunk Configuration</button>
+                
+                <div class="results" id="trunkResults"></div>
+            </div>
+            
+            <!-- Tab 3: Inter-VLAN Routing -->
+            <div class="tab-content" id="tab3">
+                <div class="section-header">🔀 Inter-VLAN Routing Configuration</div>
+                
+                <div class="input-group">
+                    <label>Routing Method</label>
+                    <select id="routingMethod" onchange="updateRoutingFields()">
+                        <option value="roas">Router-on-a-Stick (Subinterfaces)</option>
+                        <option value="svi">SVI (Layer 3 Switch)</option>
+                    </select>
+                </div>
+                
+                <div id="roasFields">
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Router Hostname</label>
+                            <input type="text" id="routerHostname" placeholder="R1" value="R1">
+                        </div>
+                        <div class="input-group">
+                            <label>Physical Interface</label>
+                            <input type="text" id="routerInterface" placeholder="Gi0/0" value="Gi0/0">
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="sviFields" style="display: none;">
+                    <div class="input-group">
+                        <label>Layer 3 Switch Hostname</label>
+                        <input type="text" id="l3Hostname" placeholder="L3-SW1" value="L3-SW1">
+                    </div>
+                </div>
+                
+                <div id="interVLANInputs">
+                    <div class="vlan-input-group">
+                        <div class="input-row">
+                            <div>
+                                <label>VLAN ID</label>
+                                <input type="number" class="intervlan-id" placeholder="10" value="10" min="1" max="4094">
+                            </div>
+                            <div>
+                                <label>VLAN Name</label>
+                                <input type="text" class="intervlan-name" placeholder="SALES" value="SALES">
+                            </div>
+                        </div>
+                        <div class="input-row">
+                            <div>
+                                <label>Gateway IP Address</label>
+                                <input type="text" class="intervlan-ip" placeholder="10.1.10.1" value="10.1.10.1">
+                            </div>
+                            <div>
+                                <label>Subnet Mask</label>
+                                <input type="text" class="intervlan-mask" placeholder="255.255.255.0" value="255.255.255.0">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="add-vlan-btn" onclick="addInterVLAN()">+ Add Another VLAN</button>
+                <button class="calc-btn" onclick="generateInterVLANConfig()">🚀 Generate Inter-VLAN Config</button>
+                
+                <div class="results" id="interVLANResults"></div>
+            </div>
+            
+            <!-- Tab 4: VTP Configuration -->
+            <div class="tab-content" id="tab4">
+                <div class="section-header">📡 VTP (VLAN Trunking Protocol) Configuration</div>
+                
+                <div class="info-box">
+                    <strong>ℹ️ VTP Info:</strong> VTP synchronizes VLAN databases across switches. Server mode can create/modify VLANs, Client mode receives updates, Transparent mode doesn't participate but forwards VTP advertisements.
+                </div>
+                
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Switch Hostname</label>
+                        <input type="text" id="vtpHostname" placeholder="SW1" value="SW1">
+                    </div>
+                    <div class="input-group">
+                        <label>VTP Mode</label>
+                        <select id="vtpMode">
+                            <option value="server">Server</option>
+                            <option value="client">Client</option>
+                            <option value="transparent">Transparent</option>
+                            <option value="off">Off (VTP v3 only)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>VTP Domain Name</label>
+                        <input type="text" id="vtpDomain" placeholder="COMPANY" value="COMPANY">
+                    </div>
+                    <div class="input-group">
+                        <label>VTP Version</label>
+                        <select id="vtpVersion">
+                            <option value="2">Version 2</option>
+                            <option value="3">Version 3</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label>VTP Password (Optional but Recommended)</label>
+                    <input type="text" id="vtpPassword" placeholder="SecurePass123">
+                </div>
+                
+                <div class="input-group">
+                    <label>Enable VTP Pruning?</label>
+                    <select id="vtpPruning">
+                        <option value="yes">Yes (Recommended)</option>
+                        <option value="no">No</option>
+                    </select>
+                </div>
+                
+                <button class="calc-btn" onclick="generateVTPConfig()">🚀 Generate VTP Configuration</button>
+                
+                <div class="results" id="vtpResults"></div>
+            </div>
+            
+            <!-- Tab 5: Voice VLAN -->
+            <div class="tab-content" id="tab5">
+                <div class="section-header">🎤 Voice VLAN Configuration</div>
+                
+                <div class="info-box">
+                    <strong>ℹ️ Voice VLAN:</strong> Allows a single port to carry both data and voice traffic using 802.1Q tagging. Voice traffic gets priority through QoS.
+                </div>
+                
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Switch Hostname</label>
+                        <input type="text" id="voiceHostname" placeholder="SW1" value="SW1">
+                    </div>
+                    <div class="input-group">
+                        <label>Port Interface(s)</label>
+                        <input type="text" id="voiceInterface" placeholder="Fa0/1-20" value="Fa0/1-20">
+                    </div>
+                </div>
+                
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Data VLAN ID</label>
+                        <input type="number" id="voiceDataVLAN" placeholder="10" value="10" min="1" max="4094">
+                    </div>
+                    <div class="input-group">
+                        <label>Voice VLAN ID</label>
+                        <input type="number" id="voiceVoiceVLAN" placeholder="100" value="100" min="1" max="4094">
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label>Enable QoS Trust?</label>
+                    <select id="voiceQoS">
+                        <option value="cos">Trust CoS (Recommended)</option>
+                        <option value="dscp">Trust DSCP</option>
+                        <option value="none">No QoS Trust</option>
+                    </select>
+                </div>
+                
+                <button class="calc-btn" onclick="generateVoiceConfig()">🚀 Generate Voice VLAN Config</button>
+                
+                <div class="results" id="voiceResults"></div>
+            </div>
+            
+            <!-- Tab 6: Private VLAN -->
+            <div class="tab-content" id="tab6">
+                <div class="section-header">🔒 Private VLAN Configuration</div>
+                
+                <div class="warning-box">
+                    <strong>⚠️ Advanced Feature:</strong> Private VLANs provide Layer 2 isolation between ports in the same VLAN. Requires careful planning!
+                </div>
+                
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Switch Hostname</label>
+                        <input type="text" id="pvlanHostname" placeholder="SW1" value="SW1">
+                    </div>
+                    <div class="input-group">
+                        <label>Primary VLAN ID</label>
+                        <input type="number" id="pvlanPrimary" placeholder="100" value="100" min="1" max="4094">
+                    </div>
+                </div>
+                
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>
