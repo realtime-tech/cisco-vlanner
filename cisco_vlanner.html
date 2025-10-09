@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cisco VLANNER - VLAN Calculator & Cheat Sheet</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .output {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .output h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        
+        .command-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+            overflow-x: auto;
+            margin-bottom: 15px;
+            position: relative;
+        }
+        
+        .command-block pre {
+            margin: 0;
+            white-space: pre-wrap;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.85em;
+            width: auto;
+        }
+        
+        .info-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #e8eaf6;
+            border-radius: 8px;
+        }
+        
+        .info-section h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .info-section ul {
+            margin-left: 20px;
+        }
+        
+        .info-section li {
+            margin-bottom: 5px;
+        }
+        
+        .cheat-sheet {
+            grid-column: 1 / -1;
+        }
+        
+        .cheat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .cheat-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #764ba2;
+        }
+        
+        .cheat-item h4 {
+            color: #764ba2;
+            margin-bottom: 10px;
+        }
+        
+        .cheat-item code {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        
+        @media (max-width: 968px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌐 Cisco VLANNER</h1>
+            <p class="subtitle">Complete VLAN Calculator & Configuration Generator</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="card">
+                <h2>VLAN Configuration</h2>
+                
+                <div class="form-group">
+                    <label for="vlanType">VLAN Type:</label>
+                    <select id="vlanType" onchange="updateFormFields()">
+                        <option value="standard">Standard VLAN</option>
+                        <option value="trunk">Trunk Port Configuration</option>
+                        <option value="intervlan">Inter-VLAN Routing (Router-on-a-Stick)</option>
+                        <option value="voice">Voice VLAN</option>
+                        <option value="native">Native VLAN Configuration</option>
+                        <option value="multilayer">Multi-Layer Switch (SVI)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="vlanId">VLAN ID:</label>
+                    <input type="number" id="vlanId" min="1" max="4094" value="10" placeholder="1-4094">
+                </div>
+                
+                <div class="form-group">
+                    <label for="vlanName">VLAN Name:</label>
+                    <input type="text" id="vlanName" value="Sales" placeholder="e.g., Sales, Engineering">
+                </div>
+                
+                <div class="form-group" id="interfaceGroup">
+                    <label for="interface">Interface:</label>
+                    <input type="text" id="interface" value="FastEthernet0/1" placeholder="e.g., Fa0/1, Gi0/1">
+                </div>
+                
+                <div class="form-group" id="ipAddressGroup" style="display:none;">
+                    <label for="ipAddress">IP Address/Subnet:</label>
+                    <input type="text" id="ipAddress" value="192.168.10.1" placeholder="e.g., 192.168.10.1">
+                </div>
+                
+                <div class="form-group" id="subnetGroup" style="display:none;">
+                    <label for="subnet">Subnet Mask:</label>
+                    <input type="text" id="subnet" value="255.255.255.0" placeholder="e.g., 255.255.255.0">
+                </div>
+                
+                <div class="form-group" id="voiceVlanGroup" style="display:none;">
+                    <label for="voiceVlanId">Voice VLAN ID:</label>
+                    <input type="number" id="voiceVlanId" min="1" max="4094" value="20" placeholder="1-4094">
+                </div>
+                
+                <div class="form-group" id="allowedVlansGroup" style="display:none;">
+                    <label for="allowedVlans">Allowed VLANs (comma-separated or range):</label>
+                    <input type="text" id="allowedVlans" value="10,20,30" placeholder="e.g., 10,20,30 or 10-50">
+                </div>
+                
+                <div class="form-group" id="nativeVlanGroup" style="display:none;">
+                    <label for="nativeVlan">Native VLAN ID:</label>
+                    <input type="number" id="nativeVlan" min="1" max="4094" value="99" placeholder="1-4094">
+                </div>
+                
+                <div class="form-group" id="subinterfaceGroup" style="display:none;">
+                    <label for="subinterface">Subinterface Number:</label>
+                    <input type="text" id="subinterface" value="10" placeholder="e.g., 10">
+                </div>
+                
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="includeDescription">
+                        <label for="includeDescription" style="margin-bottom:0;">Include interface descriptions</label>
+                    </div>
+                </div>
+                
+                <button onclick="generateConfig()">Generate Configuration</button>
+            </div>
+            
+            <div class="card">
+                <h2>Generated Configuration</h2>
+                
+                <div id="output">
+                    <div class="info-section">
+                        <h4>📋 Instructions:</h4>
+                        <ul>
+                            <li>Select your VLAN configuration type</li>
+                            <li>Fill in the required parameters</li>
+                            <li>Click "Generate Configuration" to get Cisco IOS commands</li>
+                            <li>Copy and paste commands directly into your switch/router</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card cheat-sheet">
+            <h2>📚 VLAN Quick Reference Guide</h2>
+            
+            <div class="cheat-grid">
+                <div class="cheat-item">
+                    <h4>Basic VLAN Commands</h4>
+                    <p><code>show vlan brief</code> - View all VLANs</p>
+                    <p><code>show vlan id [number]</code> - View specific VLAN</p>
+                    <p><code>show interfaces trunk</code> - View trunk ports</p>
+                    <p><code>show interfaces switchport</code> - View port details</p>
+                </div>
+                
+                <div class="cheat-item">
+                    <h4>VLAN Types</h4>
+                    <p><strong>Data VLAN:</strong> Regular user traffic (1-4094)</p>
+                    <p><strong>Voice VLAN:</strong> VoIP phones</p>
+                    <p><strong>Management VLAN:</strong> Switch management</p>
+                    <p><strong>Native VLAN:</strong> Untagged traffic on trunk</p>
+                </div>
+                
+                <div class="cheat-item">
+                    <h4>Trunk Encapsulation</h4>
+                    <p><strong>802.1Q:</strong> Industry standard</p>
+                    <p><strong>ISL:</strong> Cisco proprietary (legacy)</p>
+                    <p>Default: 802.1Q on modern switches</p>
+                </div>
+                
+                <div class="cheat-item">
+                    <h4>Port Modes</h4>
+                    <p><code>switchport mode access</code> - Single VLAN</p>
+                    <p><code>switchport mode trunk</code> - Multiple VLANs</p>
+                    <p><code>switchport mode dynamic auto</code> - DTP negotiation</p>
+                </div>
+                
+                <div class="cheat-item">
+                    <h4>VLAN Ranges</h4>
+                    <p><strong>Normal:</strong> 1-1005 (stored in vlan.dat)</p>
+                    <p><strong>Extended:</strong> 1006-4094 (VTP transparent)</p>
+                    <p><strong>Reserved:</strong> 0, 1, 4095</p>
+                </div>
+                
+                <div class="cheat-item">
+                    <h4>Inter-VLAN Routing Methods</h4>
+                    <p><strong>Router-on-a-Stick:</strong> One physical interface</p>
+                    <p><strong>Layer 3 Switch:</strong> SVIs for each VLAN</p>
+                    <p><strong>Routed Port:</strong> no switchport command</p>
+                </div>
+                
+                <div class="cheat-item">
+                    <h4>Security Best Practices</h4>
+                    <p>• Change native VLAN from default (1)</p>
+                    <p>• Disable unused ports (shutdown)</p>
+                    <p>• Use separate management VLAN</p>
+                    <p>• Implement port security</p>
+                </div>
+                
+                <div class="cheat-item">
+                    <h4>Troubleshooting</h4>
+                    <p><code>show cdp neighbors</code> - Connected devices</p>
+                    <p><code>show mac address-table</code> - MAC addresses</p>
+                    <p><code>show spanning-tree</code> - STP status</p>
+                </div>
+                
+                <div class="cheat-item">
+                    <h4>VTP (VLAN Trunking Protocol)</h4>
+                    <p><code>vtp mode server/client/transparent</code></p>
+                    <p><code>vtp domain [name]</code></p>
+                    <p><code>vtp password [password]</code></p>
+                    <p>Recommendation: Use transparent mode</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function updateFormFields() {
+            const vlanType = document.getElementById('vlanType').value;
+            
+            document.getElementById('interfaceGroup').style.display = 'block';
+            document.getElementById('ipAddressGroup').style.display = 'none';
+            document.getElementById('subnetGroup').style.display = 'none';
+            document.getElementById('voiceVlanGroup').style.display = 'none';
+            document.getElementById('allowedVlansGroup').style.display = 'none';
+            document.getElementById('nativeVlanGroup').style.display = 'none';
+            document.getElementById('subinterfaceGroup').style.display = 'none';
+            
+            if (vlanType === 'trunk') {
+                document.getElementById('allowedVlansGroup').style.display = 'block';
+                document.getElementById('nativeVlanGroup').style.display = 'block';
+            } else if (vlanType === 'intervlan') {
+                document.getElementById('ipAddressGroup').style.display = 'block';
+                document.getElementById('subnetGroup').style.display = 'block';
+                document.getElementById('subinterfaceGroup').style.display = 'block';
+            } else if (vlanType === 'voice') {
+                document.getElementById('voiceVlanGroup').style.display = 'block';
+            } else if (vlanType === 'native') {
+                document.getElementById('nativeVlanGroup').style.display = 'block';
+                document.getElementById('allowedVlansGroup').style.display = 'block';
+            } else if (vlanType === 'multilayer') {
+                document.getElementById('ipAddressGroup').style.display = 'block';
+                document.getElementById('subnetGroup').style.display = 'block';
+            }
+        }
+        
+        function generateConfig() {
+            const vlanType = document.getElementById('vlanType').value;
+            const vlanId = document.getElementById('vlanId').value;
+            const vlanName = document.getElementById('vlanName').value;
+            const interfaceName = document.getElementById('interface').value;
+            const includeDesc = document.getElementById('includeDescription').checked;
+            
+            let config = '';
+            let info = '';
+            
+            switch(vlanType) {
+                case 'standard':
+                    config = generateStandardVLAN(vlanId, vlanName, interfaceName, includeDesc);
+                    info = `<h4>Standard VLAN Configuration</h4>
+                    <p>Creates a basic VLAN and assigns it to an access port.</p>
+                    <ul>
+                        <li>VLAN ${vlanId} (${vlanName}) will be created</li>
+                        <li>Interface ${interfaceName} will be configured as access port</li>
+                        <li>All traffic on this port will be untagged</li>
+                    </ul>`;
+                    break;
+                    
+                case 'trunk':
+                    const allowedVlans = document.getElementById('allowedVlans').value;
+                    const nativeVlan = document.getElementById('nativeVlan').value;
+                    config = generateTrunkConfig(interfaceName, allowedVlans, nativeVlan, includeDesc);
+                    info = `<h4>Trunk Port Configuration</h4>
+                    <p>Configures a trunk port to carry multiple VLANs between switches.</p>
+                    <ul>
+                        <li>Interface ${interfaceName} will become a trunk port</li>
+                        <li>Allowed VLANs: ${allowedVlans}</li>
+                        <li>Native VLAN: ${nativeVlan}</li>
+                        <li>Uses 802.1Q encapsulation</li>
+                    </ul>`;
+                    break;
+                    
+                case 'intervlan':
+                    const ipAddress = document.getElementById('ipAddress').value;
+                    const subnet = document.getElementById('subnet').value;
+                    const subinterface = document.getElementById('subinterface').value;
+                    config = generateInterVLAN(interfaceName, vlanId, ipAddress, subnet, subinterface, includeDesc);
+                    info = `<h4>Inter-VLAN Routing (Router-on-a-Stick)</h4>
+                    <p>Enables routing between VLANs using subinterfaces on a router.</p>
+                    <ul>
+                        <li>Subinterface: ${interfaceName}.${subinterface}</li>
+                        <li>VLAN: ${vlanId}</li>
+                        <li>Gateway IP: ${ipAddress}</li>
+                        <li>Subnet: ${subnet}</li>
+                    </ul>`;
+                    break;
+                    
+                case 'voice':
+                    const voiceVlanId = document.getElementById('voiceVlanId').value;
+                    config = generateVoiceVLAN(vlanId, vlanName, voiceVlanId, interfaceName, includeDesc);
+                    info = `<h4>Voice VLAN Configuration</h4>
+                    <p>Configures a port to support both data and voice traffic.</p>
+                    <ul>
+                        <li>Data VLAN: ${vlanId} (${vlanName})</li>
+                        <li>Voice VLAN: ${voiceVlanId}</li>
+                        <li>Interface: ${interfaceName}</li>
+                        <li>QoS and priority enabled for voice traffic</li>
+                    </ul>`;
+                    break;
+                    
+                case 'native':
+                    const allowedVlans2 = document.getElementById('allowedVlans').value;
+                    const nativeVlan2 = document.getElementById('nativeVlan').value;
+                    config = generateNativeVLAN(nativeVlan2, interfaceName, allowedVlans2, includeDesc);
+                    info = `<h4>Native VLAN Configuration</h4>
+                    <p>Configures the native VLAN for untagged traffic on a trunk.</p>
+                    <ul>
+                        <li>Native VLAN: ${nativeVlan2}</li>
+                        <li>Interface: ${interfaceName}</li>
+                        <li>Security: Native VLAN should differ from default VLAN 1</li>
+                        <li>Allowed VLANs: ${allowedVlans2}</li>
+                    </ul>`;
+                    break;
+                    
+                case 'multilayer':
+                    const ipAddress2 = document.getElementById('ipAddress').value;
+                    const subnet2 = document.getElementById('subnet').value;
+                    config = generateMultilayerSwitch(vlanId, vlanName, ipAddress2, subnet2, includeDesc);
+                    info = `<h4>Multi-Layer Switch SVI Configuration</h4>
+                    <p>Creates a Switch Virtual Interface for Layer 3 routing.</p>
+                    <ul>
+                        <li>VLAN: ${vlanId} (${vlanName})</li>
+                        <li>SVI IP: ${ipAddress2}</li>
+                        <li>Subnet: ${subnet2}</li>
+                        <li>Enables routing between VLANs</li>
+                    </ul>`;
+                    break;
+            }
+            
+            displayOutput(config, info);
+        }
+        
+        function generateStandardVLAN(vlanId, vlanName, interfaceName, includeDesc) {
+            let desc = includeDesc ? `\n description ${vlanName} Access Port` : '';
+            return `! Create VLAN
+configure terminal
+vlan ${vlanId}
+ name ${vlanName}
+ exit
+
+! Configure Access Port
+interface ${interfaceName}${desc}
+ switchport mode access
+ switchport access vlan ${vlanId}
+ spanning-tree portfast
+ no shutdown
+ exit
+end
+
+! Save Configuration
+write memory
+
+! Verify Configuration
+show vlan id ${vlanId}
+show interfaces ${interfaceName} switchport`;
+        }
+        
+        function generateTrunkConfig(interfaceName, allowedVlans, nativeVlan, includeDesc) {
+            let desc = includeDesc ? `\n description Trunk to Switch` : '';
+            return `! Configure Trunk Port
+configure terminal
+interface ${interfaceName}${desc}
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk native vlan ${nativeVlan}
+ switchport trunk allowed vlan ${allowedVlans}
+ no shutdown
+ exit
+end
+
+! Save Configuration
+write memory
+
+! Verify Configuration
+show interfaces ${interfaceName} trunk
+show interfaces ${interfaceName} switchport`;
+        }
+        
+        function generateInterVLAN(interfaceName, vlanId, ipAddress, subnet, subinterface, includeDesc) {
+            let desc = includeDesc ? `\n description Gateway for VLAN ${vlanId}` : '';
+            return `! Configure Router Subinterface
+configure terminal
+interface ${interfaceName}
+ no shutdown
+ exit
+
+interface ${interfaceName}.${subinterface}${desc}
+ encapsulation dot1Q ${vlanId}
+ ip address ${ipAddress} ${subnet}
+ no shutdown
+ exit
+end
+
+! Save Configuration
+write memory
+
+! Verify Configuration
+show ip interface brief
+show vlans`;
+        }
+        
+        function generateVoiceVLAN(dataVlan, vlanName, voiceVlan, interfaceName, includeDesc) {
+            let desc = includeDesc ? `\n description Voice and Data Port` : '';
+            return `! Create VLANs
+configure terminal
+vlan ${dataVlan}
+ name ${vlanName}
+ exit
+vlan ${voiceVlan}
+ name Voice
+ exit
+
+! Configure Voice Port
+interface ${interfaceName}${desc}
+ switchport mode access
+ switchport access vlan ${dataVlan}
+ switchport voice vlan ${voiceVlan}
+ spanning-tree portfast
+ mls qos trust cos
+ no shutdown
+ exit
+end
+
+! Save Configuration
+write memory
+
+! Verify Configuration
+show interfaces ${interfaceName} switchport
+show vlan brief`;
+        }
+        
+        function generateNativeVLAN(nativeVlan, interfaceName, allowedVlans, includeDesc) {
+            let desc = includeDesc ? `\n description Trunk with Native VLAN ${nativeVlan}` : '';
+            return `! Create Native VLAN
+configure terminal
+vlan ${nativeVlan}
+ name Native_VLAN
+ exit
+
+! Configure Trunk with Native VLAN
+interface ${interfaceName}${desc}
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk native vlan ${nativeVlan}
+ switchport trunk allowed vlan ${allowedVlans}
+ no shutdown
+ exit
+end
+
+! Save Configuration
+write memory
+
+! Verify Configuration
+show interfaces ${interfaceName} trunk
+show vlan brief`;
+        }
+        
+        function generateMultilayerSwitch(vlanId, vlanName, ipAddress, subnet, includeDesc) {
+            let desc = includeDesc ? `\n description ${vlanName} Gateway` : '';
+            return `! Enable IP Routing
+configure terminal
+ip routing
+
+! Create VLAN
+vlan ${vlanId}
+ name ${vlanName}
+ exit
+
+! Configure SVI (Switch Virtual Interface)
+interface vlan ${vlanId}${desc}
+ ip address ${ipAddress} ${subnet}
+ no shutdown
+ exit
+end
+
+! Save Configuration
+write memory
+
+! Verify Configuration
+show ip interface brief
+show vlan brief
+show ip route`;
+        }
+        
+        function displayOutput(commands, info) {
+            const output = document.getElementById('output');
+            output.innerHTML = `
+                <div class="info-section">
+                    ${info}
+                </div>
+                <div class="output">
+                    <h3>Cisco IOS Commands</h3>
+                    <div class="command-block">
+                        <button class="copy-btn" onclick="copyToClipboard()">Copy</button>
+                        <pre id="commandText">${commands}</pre>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function copyToClipboard() {
+            const text = document.getElementById('commandText').innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                btn.textContent = 'Copied!';
+                setTimeout(() => {
+                    btn.textContent = 'Copy';
+                }, 2000);
+            });
+        }
+        
+        updateFormFields();
+    </script>
+</body>
+</html>
